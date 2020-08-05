@@ -3,6 +3,8 @@
   "main": "scraper.js",
   "dependencies": {
     "cheerio": "latest",
+    "express": "^4.17.1",
+    "moment": "^2.27.0",
     "request": "latest",
     "sqlite3": "latest"
   },

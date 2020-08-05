@@ -57,12 +57,13 @@ function readRows(db) {
 
 function fetchPage(url, callback) {
 	// Use request to read in pages.
+	console.log(url);
 	request(url, function (error, response, body) {
 		if (error) {
 			console.log("Error requesting page: " + error);
 			return;
 		}
-		callback(body);
+		callback(body, url);
 	});
 }
 
@@ -124,33 +125,40 @@ function fetchRecursive(db, page) {
 	});
 }
 
-function run(db) {
-	fetchRecursive(db,0);
-	// Use request to read in pages.
-	/*
-	var done = false;
-	for (var page = 0; page<10; page++) {
-		fetchPage(root + "/events?page=" + page, function (body) {
+function fetchAll(db, last) {
+	for (var page = 0; page < last; page++) {
+		fetchPage(root + "/events?event_date=All&page=" + page, function (body,url) {
 			// Use cheerio to find things in the page with css selectors.
 			var $ = cheerio.load(body);
-			if ($("section.region-1 p.sorry-no-result").length > 0) {
-				done = true;
-				return;
-			}
 			var elements = $("section.region-1 div.view-events-list div.views-row").each(function () {
 				var session = {
 					// todo Find a solution for single dates (.date-display-single)
 					link: root + $(this).find("h2 > a").attr("href").trim(),
 					title: $(this).find("h2 > a").text().trim(),
 					start: $(this).find("span.date-display-start").text().trim(),
-					end: $(this).find("span.date-display-end").text().trim(),
+					end: $(this).find("span.date-display-end").text().trim(), sessionDateFormat,
 					country: $(this).find("div.field-name-field-event-location-country a").text().trim()
 				};
-				updateSession(db,session);
+				if (!session.start && !session.end) {
+					session.start = $(this).find("span.date-display-single").text().trim();
+					session.end = session.start;
+				}
+				insertSession(db,session);
+				fetchSession(db,session.link);
 			});
+			console.log("Done with page " + url);
 		});
 	}
-	 */
+
+}
+
+function run(db) {
+	fetchPage(root + "/events?event_date=All&page=10000", function (body) {
+		var $ = cheerio.load(body);
+		if ($("section.region-1 p.sorry-no-result").length > 0) {
+			fetchAll(db,($("li.pager-current").text().trim()))
+		}
+	});
 }
 
 initDatabase(run);

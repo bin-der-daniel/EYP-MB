@@ -95,7 +95,7 @@ function fetchSession(db, link) {
 }
 
 function fetchRecursive(db, page) {
-	fetchPage(root + "/events?page=" + page, function (body) {
+	fetchPage(root + "/events?event_date=All&page=" + page, function (body) {
 		// Use cheerio to find things in the page with css selectors.
 		var $ = cheerio.load(body);
 		if ($("section.region-1 p.sorry-no-result").length > 0) {

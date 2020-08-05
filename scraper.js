@@ -32,7 +32,7 @@ function insertCall(db, call) {
 	statement.run(call.link, call.position, moment(call.start, callDateFormat).toISOString(),
 		moment(call.deadline, callDateFormat).toISOString());
 	statement.finalize();
-	console.log("Call inserted" + call.link + " - " + call.position);
+	//console.log("Call inserted" + call.link + " - " + call.position);
 }
 
 function updateSession(db, link, data) {
@@ -45,7 +45,7 @@ function updateSession(db, link, data) {
 	var statement = db.prepare(`UPDATE sessions SET ${setString} WHERE link=?`);
 	statement.run(link);
 	statement.finalize();
-	console.log(("Updated ") + link);
+	//console.log(("Updated ") + link);
 }
 
 function readRows(db) {
@@ -57,7 +57,7 @@ function readRows(db) {
 
 function fetchPage(url, callback) {
 	// Use request to read in pages.
-	console.log(url);
+	//console.log(url);
 	request(url, function (error, response, body) {
 		if (error) {
 			console.log("Error requesting page: " + error);
@@ -69,29 +69,35 @@ function fetchPage(url, callback) {
 
 function fetchSession(db, link) {
 	fetchPage(link, function (body) {
-		var $ = cheerio.load(body);
-		var data = {
-			type: $("div.field-name-field-event-type > div.field-items > div.field-item").text().trim(),
-			city: $("div.field-name-field-event-location-city > div.field-items > div.field-item").text().trim()
-		};
-		var genDeadline = $("div.field-name-field-event-general-deadline span.date-display-single").text().trim();
-		var calls = $("ul.applic-times div.applic-time").each(function () {
-			var call = {
-				link: link,
-				position: $(this).find("div.label").text().trim()
+		try {
+			var $ = cheerio.load(body);
+			var data = {
+				type: $("div.field-name-field-event-type > div.field-items > div.field-item").text().trim(),
+				city: $("div.field-name-field-event-location-city > div.field-items > div.field-item").text().trim()
 			};
-			// Delete position element
-			if ($(this).hasClass("general")) {
-				call.start = moment(genDeadline, sessionDateFormat);
-				call.deadline = call.start;
-			} else {
-				var dates = $(this).text().trim().split(' - ');
-				call.start = dates[0].trim() + "-" + dates[1].trim();
-				call.deadline = dates[2].trim() + "-" + dates[3].trim();
-			}
-			insertCall(db,call);
-		});
-		updateSession(db,link,data);
+			var genDeadline = $("div.field-name-field-event-general-deadline span.date-display-single").text().trim();
+			var calls = $("ul.applic-times div.applic-time").each(function () {
+				var call = {
+					link: link,
+					position: $(this).find("div.label").text().trim()
+				};
+				// Delete position element
+				if ($(this).hasClass("general")) {
+					call.start = moment(genDeadline, sessionDateFormat);
+					call.deadline = call.start;
+				} else {
+					var dates = $(this).text().trim().split(' - ');
+					call.start = dates[0].trim() + "-" + dates[1].trim();
+					call.deadline = dates[2].trim() + "-" + dates[3].trim();
+				}
+				insertCall(db,call);
+			});
+			updateSession(db,link,data);
+		}
+		catch (err) {
+			console.log("Error when loading session " + link);
+			console.log(err);
+		}
 	});
 }
 
@@ -120,7 +126,7 @@ function fetchRecursive(db, page) {
 			}
 			insertSession(db,session);
 		});
-		console.log("Done with page " + page);
+		//console.log("Done with page " + page);
 		fetchRecursive(db,++page);
 	});
 }
@@ -146,7 +152,7 @@ function fetchAll(db, last) {
 				insertSession(db,session);
 				fetchSession(db,session.link);
 			});
-			console.log("Done with page " + url);
+			//console.log("Done with page " + url);
 		});
 	}
 

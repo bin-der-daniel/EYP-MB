@@ -8,6 +8,8 @@ var moment = require("moment");
 var root = "https://members.eyp.org";
 var sessionDateFormat = "DD/MM/YYYY";
 var callDateFormat = "DD/MM/YYYY-hh:mm";
+var thresholdDate = new Date();
+thresholdDate.setFullYear( thresholdDate.getFullYear() - 5 );
 
 function initDatabase(callback) {
 	// Set up sqlite database.
@@ -150,7 +152,9 @@ function fetchAll(db, last) {
 					session.end = session.start;
 				}
 				insertSession(db,session);
-				fetchSession(db,session.link);
+				if (session.start > thresholdDate) {
+					fetchSession(db,session.link);
+				}
 			});
 			//console.log("Done with page " + url);
 		});

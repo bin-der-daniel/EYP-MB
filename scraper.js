@@ -9,7 +9,7 @@ var root = "https://members.eyp.org";
 var sessionDateFormat = "DD/MM/YYYY";
 var callDateFormat = "DD/MM/YYYY-hh:mm";
 var thresholdDate = new Date();
-thresholdDate.setFullYear( thresholdDate.getFullYear() - 5 );
+thresholdDate.setFullYear( thresholdDate.getFullYear() - 1 );
 
 function initDatabase(callback) {
 	// Set up sqlite database.

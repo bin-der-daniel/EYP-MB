@@ -152,7 +152,7 @@ function fetchAll(db, last) {
 					session.end = session.start;
 				}
 				insertSession(db,session);
-				if (session.start > thresholdDate) {
+				if (moment(session.start, sessionDateFormat) > thresholdDate) {
 					fetchSession(db,session.link);
 				}
 			});

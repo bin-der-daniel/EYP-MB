@@ -166,7 +166,7 @@ function fetchAll(db, last) {
     console.log(pagePromises.length)
     Promise.all(pagePromises).then(() => {
         console.log("Done with events overview -> Let's do the events");
-        db.each("SELECT link FROM sessions WHERE start > date('now', '-5 years')", function(err, row) {
+        db.each("SELECT link FROM sessions WHERE start > date('now', '-10 years')", function(err, row) {
             fetchSession(db,row.link);
         });
     });

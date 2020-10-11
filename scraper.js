@@ -156,7 +156,6 @@ function fetchAll(db, last) {
                     insertSession(db, session);
                 });
                 //console.log("Done with page " + url);
-                console.log(++pageCount + " of " + last + " pages done");
                 resolve();
             });
         }));
@@ -171,7 +170,6 @@ function fetchAll(db, last) {
         console.log("Done with events overview -> Let's do the events");
         db.each("SELECT link FROM sessions WHERE start > date('now', '-0.5 years') OR type = NULL OR city = NULL", function(err, row) {
             fetchSession(db,row.link);
-            console.log(++sessionCount + " sessions done");
         });
     });
 

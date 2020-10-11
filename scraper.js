@@ -133,6 +133,7 @@ function fetchRecursive(db, page) {
 }
 
 function fetchAll(db, last) {
+    let pageCount = 0;
     const pagePromises = [];
     for (var page = 0; page < last; page++) {
         var promise = new Promise(((resolve, reject) => {
@@ -153,11 +154,9 @@ function fetchAll(db, last) {
                         session.end = session.start;
                     }
                     insertSession(db, session);
-                    if (moment(session.start, sessionDateFormat) > thresholdDate) {
-                        fetchSession(db, session.link);
-                    }
                 });
                 //console.log("Done with page " + url);
+                console.log(++pageCount + " of " + last + " pages done");
                 resolve();
             });
         }));
@@ -165,9 +164,14 @@ function fetchAll(db, last) {
     }
     console.log(pagePromises.length)
     Promise.all(pagePromises).then(() => {
+        let sessionCount = 0;
+        db.get("SELECT COUNT(*) cnt FROM sessions WHERE start > date('now', '-1 years')", (err, row) => {
+            console.log("Sessions to fetch: " + row.cnt);
+        });
         console.log("Done with events overview -> Let's do the events");
-        db.each("SELECT link FROM sessions WHERE start > date('now', '-7 years')", function(err, row) {
+        db.each("SELECT link FROM sessions WHERE start > date('now', '-1 years')", function(err, row) {
             fetchSession(db,row.link);
+            console.log(++sessionCount + " sessions done");
         });
     });
 

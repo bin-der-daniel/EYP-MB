@@ -164,7 +164,7 @@ function fetchAll(db, last) {
     console.log(pagePromises.length)
     Promise.all(pagePromises).then(() => {
         let sessionCount = 0;
-        db.get("SELECT link FROM sessions WHERE start > date('now', '-0.5 years') OR type = NULL OR city = NULL", (err, row) => {
+        db.get("SELECT COUNT(*) FROM sessions WHERE start > date('now', '-0.5 years') OR type = NULL OR city = NULL", (err, row) => {
             console.log("Sessions to fetch: " + row.cnt);
         });
         console.log("Done with events overview -> Let's do the events");

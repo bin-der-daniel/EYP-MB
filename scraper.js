@@ -61,6 +61,9 @@ function fetchPage(url, callback) {
     // Use request to read in pages.
     //console.log(url);
     request(url, function (error, response, body) {
+        if (response.statusCode.toString().match(/[^2]\d\d/g)) {
+            console.log("Request to " + url + "errored with error " + response.statusCode);
+        }
         if (error) {
             console.log("Error requesting page: " + error);
             return;
@@ -77,6 +80,12 @@ function fetchSession(db, link) {
                 type: $("div.field-name-field-event-type > div.field-items > div.field-item").text().trim(),
                 city: $("div.field-name-field-event-location-city > div.field-items > div.field-item").text().trim()
             };
+            if (data.city.trim() == '' && data.type.trim() == '') {
+                console.log(link + "\n\t Type: " + data.type + "\n\t City: " + data.city + "\n\t" + body);
+            } else {
+                console.log(link + "\n\t Type: " + data.type + "\n\t City: " + data.city);
+            }
+
             var genDeadline = $("div.field-name-field-event-general-deadline span.date-display-single").text().trim();
             var calls = $("ul.applic-times div.applic-time").each(function () {
                 var call = {
@@ -164,11 +173,8 @@ function fetchAll(db, last) {
     console.log(pagePromises.length)
     Promise.all(pagePromises).then(() => {
         let sessionCount = 0;
-        db.get("SELECT COUNT(*) FROM sessions WHERE start > date('now', '-0.5 years') OR type IS NULL OR city IS NULL", (err, row) => {
-            console.log("Sessions to fetch: " + row.cnt);
-        });
         console.log("Done with events overview -> Let's do the events");
-        db.each("SELECT link FROM sessions WHERE start > date('now', '-0.5 years') OR type IS NULL OR city IS NULL", function(err, row) {
+        db.each("SELECT link FROM sessions WHERE start > date('now', '-1 years')", function(err, row) {
             fetchSession(db,row.link);
             console.log(++sessionCount + " sessions done");
         });
